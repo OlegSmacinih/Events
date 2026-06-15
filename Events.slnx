@@ -1,0 +1,8 @@
+<Solution>
+  <Project Path="Events.Api/Events.Api.csproj" />
+  <Project Path="Events.Contracts/Events.Contracts.csproj" />
+  <Project Path="Events.Infrastructure/Events.Infrastructure.csproj" />
+  <Project Path="Gdo.Worker/Gdo.Worker.csproj" />
+  <Project Path="Lamp.Worker/Lamp.Worker.csproj" />
+  <Project Path="Vkp.Worker/Vkp.Worker.csproj" />
+</Solution>
