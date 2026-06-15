@@ -26,20 +26,31 @@ app.MapPost("api/devices/{serialNumber}/events",
         IRabbitMqPublisher publisher,
         CancellationToken cancellationToken) =>
     {
-        var deviceType = DeviceTypeParser.Parse(serialNumber);
-        if (!DeviceEventValidator.IsValid(deviceType, request.Type)) return Results.BadRequest("Invalid event type for this device.");
-
-        var message = new EventMessage
+        try
         {
-            SerialNumber = serialNumber,
-            DeviceType = deviceType,
-            EventType = request.Type,
-            TimeStamp = DateTimeOffset.UtcNow
-        };
+            var deviceType = DeviceTypeParser.Parse(serialNumber);
+            if (!DeviceEventValidator.IsValid(deviceType, request.Type)) return Results.BadRequest("Invalid event type for this device.");
 
-        var routingKey = $"{deviceType.ToString().ToLower()}.{request.Type}";
+            var message = new EventMessage
+            {
+                SerialNumber = serialNumber,
+                DeviceType = deviceType,
+                EventType = request.Type,
+                TimeStamp = DateTimeOffset.UtcNow
+            };
 
-        await publisher.PublishAsync(message, routingKey, cancellationToken);
+            var routingKey = $"{deviceType.ToString().ToLower()}.{request.Type}";
+
+            await publisher.PublishAsync(message, routingKey, cancellationToken);
+        }
+        catch (ArgumentException ex)
+        {
+            return Results.InternalServerError(ex.Message);
+        }
+        catch (Exception ex)
+        {
+            return Results.InternalServerError("Some error appeared on the server");
+        }
 
         return Results.Accepted();
     });
