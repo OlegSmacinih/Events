@@ -1,4 +1,6 @@
-﻿using RabbitMQ.Client;
+﻿using Gdo.Worker.Configuration;
+using Microsoft.Extensions.Options;
+using RabbitMQ.Client;
 using System.Text;
 using System.Text.Json;
 
@@ -6,11 +8,11 @@ namespace Events.Api.Messaging;
 
 public class RabbitMqPublisher : IRabbitMqPublisher
 {
-    private readonly IConfiguration _configuration;
+    private readonly RabbitMqOptions _options;
 
-    public RabbitMqPublisher(IConfiguration configuration)
+    public RabbitMqPublisher(IOptions<RabbitMqOptions> options)
     {
-        _configuration = configuration;
+        _options = options.Value;
     }
 
     public async Task PublishAsync<T>(
@@ -20,15 +22,15 @@ public class RabbitMqPublisher : IRabbitMqPublisher
     {
         var factory = new ConnectionFactory
         {
-            HostName = _configuration["RabbitMq:HostName"],
-            UserName = _configuration["RabbitMq:UserName"],
-            Password = _configuration["RabbitMq:Password"]
+            HostName = _options.HostName,
+            UserName = _options.UserName,
+            Password = _options.Password
         };
 
         using var connection = await factory.CreateConnectionAsync(cancellationToken);
         using var channel = await connection.CreateChannelAsync(cancellationToken: cancellationToken);
 
-        var exchangeName = _configuration["RabbitMq:ExchangeName"];
+        var exchangeName = _options.ExchangeName;
 
         await channel.ExchangeDeclareAsync(
             exchange: exchangeName,

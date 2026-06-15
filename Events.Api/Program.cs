@@ -4,12 +4,14 @@ using Events.Contracts.Messages;
 using Events.Contracts.Parsing;
 using Events.Contracts.Requests;
 using Events.Contracts.Validation;
+using Gdo.Worker.Configuration;
 
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwagger();
 
+builder.Services.Configure<RabbitMqOptions>(builder.Configuration.GetSection("RabbitMq"));
 builder.Services.AddSingleton<IRabbitMqPublisher, RabbitMqPublisher>();
 
 var app = builder.Build();
