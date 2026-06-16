@@ -1,4 +1,4 @@
-﻿namespace Events.Api.Messaging;
+﻿namespace Events.Contracts.Abstractions;
 
 public interface IRabbitMqPublisher
 {
