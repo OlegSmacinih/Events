@@ -2,10 +2,10 @@
 using Amazon.DynamoDBv2.Model;
 using Events.Contracts.Abstractions;
 using Events.Contracts.Messages;
-using Events.Infrastructure.Configuration;
+using Events.Infrastructure.DynamoDb;
 using Microsoft.Extensions.Options;
 
-namespace Events.Infrastructure.DynamoDb;
+namespace Events.Infrastructure;
 
 public class EventRepository : IEventRepository
 {
