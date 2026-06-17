@@ -4,5 +4,5 @@ namespace Events.Contracts.Abstractions;
 
 public interface IEventRepository
 {
-    Task SaveAsync(EventMessage message);
+    Task SaveAsync(EventMessage message, CancellationToken cancellationToken);
 }

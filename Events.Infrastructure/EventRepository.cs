@@ -18,7 +18,7 @@ public class EventRepository : IEventRepository
         _options = options.Value;
     }
 
-    public async Task SaveAsync(EventMessage message)
+    public async Task SaveAsync(EventMessage message, CancellationToken cancellationToken)
     {
         var item = new Dictionary<string, AttributeValue>
         {

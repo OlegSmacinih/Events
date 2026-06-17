@@ -14,16 +14,16 @@ public class RabbitMqConsumer : IRabbitMqConsumer
 {
     private readonly ILogger<RabbitMqConsumer> _logger;
     private readonly RabbitMqConsumerOptions _options;
-    private readonly IEventRepository _eventRepository;    
+    private readonly IEventMessageProcessor _messageProcessor;
 
     public RabbitMqConsumer(
         ILogger<RabbitMqConsumer> logger,
         IOptions<RabbitMqConsumerOptions> options,
-        IEventRepository eventRepository)
+        IEventMessageProcessor messageProcessor)
     {
         _logger = logger;
         _options = options.Value;
-        _eventRepository = eventRepository;
+        _messageProcessor = messageProcessor;
     }
 
     private async Task DeclareRabbitMq(
@@ -94,8 +94,8 @@ public class RabbitMqConsumer : IRabbitMqConsumer
                 }
 
                 _logger.LogInformation($"Received {deviceType} event. SerialNumber={message.SerialNumber}, EventType={message.EventType}, TimeStamp={message.TimeStamp}");
-
-                await _eventRepository.SaveAsync(message);
+               
+                await _messageProcessor.ProcessAsync(message, cancellationToken);
                 await channel.BasicAckAsync(ea.DeliveryTag, false, cancellationToken);
             }
             catch (Exception ex)
