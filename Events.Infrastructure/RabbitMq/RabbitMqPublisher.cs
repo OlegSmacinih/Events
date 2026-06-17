@@ -8,9 +8,9 @@ namespace Events.Infrastructure.RabbitMq;
 
 public class RabbitMqPublisher : IRabbitMqPublisher
 {
-    private readonly RabbitMqOptions _options;
+    private readonly RabbitMqPublisherOptions _options;
 
-    public RabbitMqPublisher(IOptions<RabbitMqOptions> options)
+    public RabbitMqPublisher(IOptions<RabbitMqPublisherOptions> options)
     {
         _options = options.Value;
     }

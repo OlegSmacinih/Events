@@ -13,23 +13,12 @@ namespace Events.Infrastructure.RabbitMq;
 public class RabbitMqConsumer : IRabbitMqConsumer
 {
     private readonly ILogger<RabbitMqConsumer> _logger;
-    private readonly RabbitMqOptions _options;
-    private readonly IEventRepository _eventRepository;
-
-    private (string queueName, string routingKey) GetQueueAndRoutingKey(DeviceType deviceType, CancellationToken cancellationToken)
-    {
-        return deviceType switch
-        {
-            DeviceType.Gdo => (_options.GdoQueue, _options.GdoRoutingKey),
-            DeviceType.Lamp => (_options.LampQueue, _options.LampRoutingKey),
-            DeviceType.Vkp => (_options.VkpQueue, _options.VkpRoutingKey),
-            _ => throw new ArgumentException(nameof(deviceType))
-        };
-    }
+    private readonly RabbitMqConsumerOptions _options;
+    private readonly IEventRepository _eventRepository;    
 
     public RabbitMqConsumer(
         ILogger<RabbitMqConsumer> logger,
-        IOptions<RabbitMqOptions> options,
+        IOptions<RabbitMqConsumerOptions> options,
         IEventRepository eventRepository)
     {
         _logger = logger;
@@ -78,10 +67,9 @@ public class RabbitMqConsumer : IRabbitMqConsumer
         using var connection = await factory.CreateConnectionAsync(cancellationToken);
         using var channel = await connection.CreateChannelAsync(cancellationToken: cancellationToken);
 
-        var exchangeName = _options.ExchangeName;
-        var queueAndRoutingKey = GetQueueAndRoutingKey(deviceType, cancellationToken);
-        var queueName = queueAndRoutingKey.queueName;
-        var routingKey = queueAndRoutingKey.routingKey;
+        var exchangeName = _options.ExchangeName;        
+        var queueName = _options.QueueName;
+        var routingKey = _options.RoutingKey;
 
         await DeclareRabbitMq(
             channel,
@@ -128,6 +116,5 @@ public class RabbitMqConsumer : IRabbitMqConsumer
 
         await Task.Delay(Timeout.Infinite, cancellationToken);
     }
-
 
 }

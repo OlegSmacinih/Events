@@ -3,7 +3,7 @@ using Events.Infrastructure.RabbitMq;
 using Gdo.Worker;
 
 var builder = Host.CreateApplicationBuilder(args);
-builder.Services.Configure<RabbitMqOptions>(builder.Configuration.GetSection("RabbitMq"));
+builder.Services.Configure<RabbitMqPublisherOptions>(builder.Configuration.GetSection("RabbitMq"));
 builder.Services.AddRabbitMqConsumeInfrastructure(builder.Configuration);
 builder.Services.AddDynamoDbInfrastructure(builder.Configuration);
 
