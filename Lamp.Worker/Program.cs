@@ -8,8 +8,8 @@ var builder = Host.CreateApplicationBuilder(args);
 
 builder.Services.AddRabbitMqConsumeInfrastructure(builder.Configuration);
 builder.Services.AddDynamoDbInfrastructure(builder.Configuration);
-builder.Services.AddScoped<IEventRepository, EventRepository>();
-builder.Services.AddScoped<IEventMessageProcessor, LampEventMessageProcessor>();
+builder.Services.AddSingleton<IEventRepository, EventRepository>();
+builder.Services.AddSingleton<IEventMessageProcessor, LampEventMessageProcessor>();
 
 builder.Services.AddHostedService<Worker>();
 

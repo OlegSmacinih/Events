@@ -17,7 +17,7 @@ public static class DependencyInjection
     public static IServiceCollection AddRabbitMqConsumeInfrastructure(this IServiceCollection services, IConfiguration configuration)
     {
         services.Configure<RabbitMqConsumerOptions>(configuration.GetSection("RabbitMq"));        
-        services.AddScoped<IRabbitMqConsumer, RabbitMqConsumer>();
+        services.AddSingleton<IRabbitMqConsumer, RabbitMqConsumer>();
 
         return services;
     }

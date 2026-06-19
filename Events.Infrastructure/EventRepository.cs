@@ -29,7 +29,11 @@ public class EventRepository : IEventRepository
             ["SerialNumber"] = new AttributeValue { S = message.SerialNumber },
             ["TimeStamp"] = new AttributeValue { S = message.TimeStamp.ToString() },
             ["DeviceType"] = new AttributeValue { S = message.DeviceType.ToString() },
-            ["EventType"] = new AttributeValue { S = message.EventType }
+            ["EventType"] = new AttributeValue { S = message.EventType },
+            ["SerialNumberEventType"] = new AttributeValue
+            {
+                S = $"{message.SerialNumber}#{message.EventType}"
+            }
         };
 
         await _dynamoDb.PutItemAsync(new PutItemRequest
@@ -107,14 +111,14 @@ public class EventRepository : IEventRepository
         var request = new QueryRequest
         {
             TableName = _options.TableName,
-            KeyConditionExpression = "SerialNumber = :serialNumber",
-            FilterExpression = "EventType = :eventType",
+            IndexName = "SerialNumberEventTypeIndex",
+            KeyConditionExpression = "SerialNumberEventType = :pk",            
             ExpressionAttributeValues = new Dictionary<string, AttributeValue>
             {
-                [":serialNumber"] = new AttributeValue { S = serialNumber },
-                [":eventType"] = new AttributeValue { S = eventType }
+                [":pk"] = new AttributeValue { S = $"{serialNumber}#{eventType}" }
             },
-            ScanIndexForward = false
+            ScanIndexForward = false,
+            Limit = 1
         };
 
         var response = await _dynamoDb.QueryAsync(request, cancellationToken);
