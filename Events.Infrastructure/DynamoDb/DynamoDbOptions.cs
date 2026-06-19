@@ -1,4 +1,4 @@
-﻿namespace Events.Infrastructure.Configuration;
+﻿namespace Events.Infrastructure.DynamoDb;
 
 public class DynamoDbOptions
 {

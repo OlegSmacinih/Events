@@ -1,16 +1,16 @@
-﻿using Gdo.Worker.Configuration;
+﻿using Events.Contracts.Abstractions;
 using Microsoft.Extensions.Options;
 using RabbitMQ.Client;
 using System.Text;
 using System.Text.Json;
 
-namespace Events.Api.Messaging;
+namespace Events.Infrastructure.RabbitMq;
 
 public class RabbitMqPublisher : IRabbitMqPublisher
 {
-    private readonly RabbitMqOptions _options;
+    private readonly RabbitMqPublisherOptions _options;
 
-    public RabbitMqPublisher(IOptions<RabbitMqOptions> options)
+    public RabbitMqPublisher(IOptions<RabbitMqPublisherOptions> options)
     {
         _options = options.Value;
     }
@@ -30,7 +30,7 @@ public class RabbitMqPublisher : IRabbitMqPublisher
         using var connection = await factory.CreateConnectionAsync(cancellationToken);
         using var channel = await connection.CreateChannelAsync(cancellationToken: cancellationToken);
 
-        var exchangeName = _options.ExchangeName;
+        var exchangeName =  _options.ExchangeName;
 
         await channel.ExchangeDeclareAsync(
             exchange: exchangeName,

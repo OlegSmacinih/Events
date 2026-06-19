@@ -1,11 +1,15 @@
-using Events.Infrastructure;
+using Events.Contracts.Abstractions;
+using Events.Infrastructure.DynamoDb;
+using Events.Infrastructure.RabbitMq;
 using Lamp.Worker;
-using Lamp.Worker.Configuration;
 
 var builder = Host.CreateApplicationBuilder(args);
-builder.Services.Configure<RabbitMqOptions>(builder.Configuration.GetSection("RabbitMq"));
 
-builder.Services.AddInfrastructure(builder.Configuration);
+builder.Services.Configure<RabbitMqPublisherOptions>(builder.Configuration.GetSection("RabbitMq"));
+builder.Services.AddRabbitMqConsumeInfrastructure(builder.Configuration);
+builder.Services.AddSingleton<IEventMessageProcessor, LampEventMessageProcessor>();
+
+builder.Services.AddDynamoDbInfrastructure(builder.Configuration);
 
 builder.Services.AddHostedService<Worker>();
 

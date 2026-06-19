@@ -1,6 +1,6 @@
-﻿namespace Lamp.Worker.Configuration;
+﻿namespace Events.Infrastructure.RabbitMq;
 
-public class RabbitMqOptions
+public class RabbitMqConsumerOptions
 {
     public string HostName { get; set; }
     public string UserName { get; set; }

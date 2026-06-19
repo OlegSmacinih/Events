@@ -1,0 +1,14 @@
+services:
+  rabbitmq:
+    image: rabbitmq:3-managment
+    container_name: rabbitmq
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+ 
+  dynamodb:
+    image: amazon/dynamodb-local
+    container_name: dynamodb-local
+    ports:
+      - "8000:8000"
+    command: "-jar DynamoDBLocal.jar -sharedDb"
