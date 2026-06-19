@@ -24,34 +24,7 @@ public class RabbitMqConsumer : IRabbitMqConsumer
         _logger = logger;
         _options = options.Value;
         _messageProcessor = messageProcessor;
-    }
-
-    private async Task DeclareRabbitMq(
-        IChannel channel,
-        string exchangeName,
-        string queueName,
-        string routingKey,
-        CancellationToken cancellationToken)
-    {
-        await channel.ExchangeDeclareAsync(
-            exchange: exchangeName,
-            type: ExchangeType.Topic,
-            durable: true,
-            cancellationToken: cancellationToken);
-
-        await channel.QueueDeclareAsync(
-            queue: queueName,
-            durable: true,
-            exclusive: false,
-            autoDelete: false,
-            cancellationToken: cancellationToken);
-
-        await channel.QueueBindAsync(
-            queue: queueName,
-            exchange: exchangeName,
-            routingKey: routingKey,
-            cancellationToken: cancellationToken);
-    }
+    }    
 
     public async Task StartConsumingAsync(
         DeviceType deviceType,
@@ -81,29 +54,7 @@ public class RabbitMqConsumer : IRabbitMqConsumer
         var consumer = new AsyncEventingBasicConsumer(channel);
         consumer.ReceivedAsync += async (model, ea) =>
         {
-            try
-            {
-                var json = Encoding.UTF8.GetString(ea.Body.ToArray());
-                var message = JsonSerializer.Deserialize<EventMessage>(json);
-
-                if (message is null)
-                {
-                    _logger.LogWarning("Received empty or invalid message");
-                    await channel.BasicAckAsync(ea.DeliveryTag, false, cancellationToken);
-                    return;
-                }
-
-                _logger.LogInformation($"Received {deviceType} event. SerialNumber={message.SerialNumber}, EventType={message.EventType}, TimeStamp={message.TimeStamp}");
-               
-                await _messageProcessor.ProcessAsync(message, cancellationToken);
-                await channel.BasicAckAsync(ea.DeliveryTag, false, cancellationToken);
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, $"Error while processing {deviceType} message");
-
-                await channel.BasicNackAsync(ea.DeliveryTag, false, false, cancellationToken);
-            }
+            await HandleMessageAsync(channel, deviceType, ea, cancellationToken);
         };
 
         await channel.BasicConsumeAsync(
@@ -115,6 +66,64 @@ public class RabbitMqConsumer : IRabbitMqConsumer
         _logger.LogInformation($"{deviceType} worker started. Queue={queueName}, RoutingKey={routingKey}");
 
         await Task.Delay(Timeout.Infinite, cancellationToken);
+    }
+
+    private async Task DeclareRabbitMq(
+        IChannel channel,
+        string exchangeName,
+        string queueName,
+        string routingKey,
+        CancellationToken cancellationToken)
+    {
+        await channel.ExchangeDeclareAsync(
+            exchange: exchangeName,
+            type: ExchangeType.Topic,
+            durable: true,
+            cancellationToken: cancellationToken);
+
+        await channel.QueueDeclareAsync(
+            queue: queueName,
+            durable: true,
+            exclusive: false,
+            autoDelete: false,
+            cancellationToken: cancellationToken);
+
+        await channel.QueueBindAsync(
+            queue: queueName,
+            exchange: exchangeName,
+            routingKey: routingKey,
+            cancellationToken: cancellationToken);
+    }
+
+    private async Task HandleMessageAsync(
+        IChannel channel,
+        DeviceType deviceType,
+        BasicDeliverEventArgs ea,
+        CancellationToken cancellationToken)
+    {
+        try
+        {
+            var json = Encoding.UTF8.GetString(ea.Body.ToArray());
+            var message = JsonSerializer.Deserialize<EventMessage>(json);
+
+            if (message is null)
+            {
+                _logger.LogWarning("Received empty or invalid message");
+                await channel.BasicAckAsync(ea.DeliveryTag, false, cancellationToken);
+                return;
+            }
+
+            _logger.LogInformation($"Received {deviceType} event. SerialNumber={message.SerialNumber}, EventType={message.EventType}, TimeStamp={message.TimeStamp}");
+
+            await _messageProcessor.ProcessAsync(message, cancellationToken);
+            await channel.BasicAckAsync(ea.DeliveryTag, false, cancellationToken);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, $"Error while processing {deviceType} message");
+
+            await channel.BasicNackAsync(ea.DeliveryTag, false, false, cancellationToken);
+        }
     }
 
 }
