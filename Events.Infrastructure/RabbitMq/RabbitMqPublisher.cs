@@ -30,7 +30,7 @@ public class RabbitMqPublisher : IRabbitMqPublisher
         using var connection = await factory.CreateConnectionAsync(cancellationToken);
         using var channel = await connection.CreateChannelAsync(cancellationToken: cancellationToken);
 
-        var exchangeName =  _options.ExchangeName;
+        var exchangeName = _options.ExchangeName;
 
         await channel.ExchangeDeclareAsync(
             exchange: exchangeName,

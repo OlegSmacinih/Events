@@ -24,9 +24,7 @@ public static class DependencyInjection
                 {
                     ServiceURL = options.ServiceUrl
                 });
-        });
-
-        services.AddSingleton<IEventRepository, EventRepository>();
+        });        
 
         return services;
     }
