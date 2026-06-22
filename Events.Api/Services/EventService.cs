@@ -23,7 +23,10 @@ public class EventService : IEventService
         CancellationToken cancellationToken)
     {
         var deviceType = DeviceTypeParser.Parse(serialNumber);
-        if (!DeviceEventValidator.IsValid(deviceType, request.Type)) throw new ArgumentException("Invalid event type for this device.");
+        if (!DeviceEventValidator.IsValid(deviceType, request.Type))
+        {
+            throw new ArgumentException("Invalid event type for this device.");
+        }        
 
         var message = new EventMessage
         {
@@ -46,8 +49,14 @@ public class EventService : IEventService
         string? cursor,
         CancellationToken cancellationToken)
     {
-        if (from > to) throw new ArgumentException("from must be earlier than to");
-        if (limit <= 0) throw new ArgumentException("limit must be positive number");
+        if (from > to)
+        {
+            throw new ArgumentException("from must be earlier than to");
+        }
+        if (limit <= 0)
+        {
+            throw new ArgumentException("limit must be positive number");
+        }
 
         return await _eventRepository.GetDevicePaginatedEventsInRangeAsync(
             serialNumber,
@@ -64,7 +73,10 @@ public class EventService : IEventService
         CancellationToken cancellationToken)
     {
         var deviceType = DeviceTypeParser.Parse(serialNumber);
-        if (!DeviceEventValidator.IsValid(deviceType, eventType)) throw new ArgumentException("Invalid event type for this device.");
+        if (!DeviceEventValidator.IsValid(deviceType, eventType))
+        {
+            throw new ArgumentException("Invalid event type for this device.");
+        }
 
         return await _eventRepository.GetMostRecentEventForTypeAsync(
             serialNumber,

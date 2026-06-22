@@ -19,9 +19,23 @@ public class ExceptionHandlingMiddleware
         {
             await _next(context);
         }
+        catch (ArgumentException ex)
+        {
+            _logger.LogError(ex, "ArgumentException appeared");
+
+            context.Response.ContentType = "application/json";
+            context.Response.StatusCode = (int)HttpStatusCode.BadRequest;
+
+            var response = new
+            {
+                message = ex.Message
+            };
+            
+            await context.Response.WriteAsJsonAsync(response);
+        }
         catch (Exception ex)
         {
-            _logger.LogError("Unhandled exception");
+            _logger.LogError(ex, "Unhandled exception");
 
             context.Response.ContentType = "application/json";
             context.Response.StatusCode = (int)HttpStatusCode.InternalServerError;
