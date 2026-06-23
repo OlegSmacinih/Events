@@ -2,7 +2,6 @@ using Events.Api.Extensions;
 using Events.Api.Middlewares;
 using Events.Api.Services;
 using Events.Contracts.Abstractions;
-using Events.Infrastructure;
 using Events.Infrastructure.DynamoDb;
 using Events.Infrastructure.RabbitMq;
 

@@ -1,0 +1,46 @@
+{
+  "AttributeDefinitions": [
+    {
+      "AttributeName": "SerialNumber",
+      "AttributeType": "S"
+    },
+    {
+      "AttributeName": "TimeStamp",
+      "AttributeType": "S"
+    },
+    {
+      "AttributeName": "SerialNumberEventType",
+      "AttributeType": "S"
+    }
+  ],
+  "TableName": "DeviceEvents",
+  "KeySchema": [
+    {
+      "AttributeName": "SerialNumber",
+      "KeyType": "HASH"
+    },
+    {
+      "AttributeName": "TimeStamp",
+      "KeyType": "RANGE"
+    }
+  ],
+  "BillingMode": "PAY_PER_REQUEST",
+  "GlobalSecondaryIndexes": [
+    {
+      "IndexName": "SerialNumberEventTypeIndex",
+      "KeySchema": [
+        {
+          "AttributeName": "SerialNumberEventType",
+          "KeyType": "HASH"
+        },
+        {
+          "AttributeName": "TimeStamp",
+          "KeyType": "RANGE"
+        }
+      ],
+      "Projection": {
+        "ProjectionType": "ALL"
+      }
+    }
+  ]
+}

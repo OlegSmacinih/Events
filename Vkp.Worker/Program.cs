@@ -1,5 +1,4 @@
 using Events.Contracts.Abstractions;
-using Events.Infrastructure;
 using Events.Infrastructure.DynamoDb;
 using Events.Infrastructure.RabbitMq;
 using Vkp.Worker;
