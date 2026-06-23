@@ -56,8 +56,7 @@ public class EventRepository : IEventRepository
                 [":from"] = new AttributeValue { S = from.ToUnixTimeSeconds().ToString() },
                 [":to"] = new AttributeValue { S = to.ToUnixTimeSeconds().ToString() }
             },
-            Limit = limit,
-            ScanIndexForward = false
+            Limit = limit
         };
 
         if (!string.IsNullOrEmpty(cursor))
