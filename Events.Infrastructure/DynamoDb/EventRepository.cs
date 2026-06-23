@@ -4,12 +4,11 @@ using Events.Contracts.Abstractions;
 using Events.Contracts.DTOs;
 using Events.Contracts.Enums;
 using Events.Contracts.Messages;
-using Events.Infrastructure.DynamoDb;
 using Microsoft.Extensions.Options;
 using System.Text;
 using System.Text.Json;
 
-namespace Events.Infrastructure;
+namespace Events.Infrastructure.DynamoDb;
 
 public class EventRepository : IEventRepository
 {
@@ -111,7 +110,7 @@ public class EventRepository : IEventRepository
         var request = new QueryRequest
         {
             TableName = _options.TableName,
-            IndexName = "SerialNumberEventTypeIndex",
+            IndexName = DynamoDbIndexes.SerialNumberEventTypeIndex,
             KeyConditionExpression = "SerialNumberEventType = :pk",            
             ExpressionAttributeValues = new Dictionary<string, AttributeValue>
             {
