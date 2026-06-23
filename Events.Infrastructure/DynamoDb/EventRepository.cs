@@ -4,6 +4,7 @@ using Events.Contracts.Abstractions;
 using Events.Contracts.DTOs;
 using Events.Contracts.Enums;
 using Events.Contracts.Messages;
+using Events.Infrastructure.DynamoDb.Mappers;
 using Microsoft.Extensions.Options;
 using System.Text;
 using System.Text.Json;
@@ -23,17 +24,7 @@ public class EventRepository : IEventRepository
 
     public async Task SaveAsync(EventMessage message, CancellationToken cancellationToken)
     {
-        var item = new Dictionary<string, AttributeValue>
-        {
-            ["SerialNumber"] = new AttributeValue { S = message.SerialNumber },
-            ["TimeStamp"] = new AttributeValue { S = message.TimeStamp.ToString() },
-            ["DeviceType"] = new AttributeValue { S = message.DeviceType.ToString() },
-            ["EventType"] = new AttributeValue { S = message.EventType },
-            ["SerialNumberEventType"] = new AttributeValue
-            {
-                S = $"{message.SerialNumber}#{message.EventType}"
-            }
-        };
+        var item = EventMessageMapper.ToDynamoDbItem(message);
 
         await _dynamoDb.PutItemAsync(new PutItemRequest
         {
@@ -80,13 +71,7 @@ public class EventRepository : IEventRepository
         var response = await _dynamoDb.QueryAsync(request, cancellationToken);
 
         var events = response.Items
-            .Select(item => new EventMessage
-            {
-                SerialNumber = item["SerialNumber"].S,
-                TimeStamp = DateTimeOffset.Parse(item["TimeStamp"].S),
-                DeviceType = Enum.Parse<DeviceType>(item["DeviceType"].S),
-                EventType = item["EventType"].S
-            })
+            .Select(item => EventMessageMapper.ToEventMessage(item))
             .ToList();
 
         var nextCursor = response.LastEvaluatedKey == null 
@@ -123,12 +108,6 @@ public class EventRepository : IEventRepository
         var response = await _dynamoDb.QueryAsync(request, cancellationToken);
         var item = response.Items.FirstOrDefault();
 
-        return item is null ? null : new EventMessage
-        {
-            SerialNumber = item["SerialNumber"].S,
-            TimeStamp = DateTimeOffset.Parse(item["TimeStamp"].S),
-            DeviceType = Enum.Parse<DeviceType>(item["DeviceType"].S),
-            EventType = item["EventType"].S
-        };
+        return item is null ? null : EventMessageMapper.ToEventMessage(item);
     }
 }
