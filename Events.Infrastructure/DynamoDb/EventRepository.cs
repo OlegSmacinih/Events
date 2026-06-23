@@ -62,9 +62,7 @@ public class EventRepository : IEventRepository
 
         if (!string.IsNullOrEmpty(cursor))
         {
-            request.ExclusiveStartKey = JsonSerializer.Deserialize<Dictionary<string, AttributeValue>>(
-                Encoding.UTF8.GetString(
-                    Convert.FromBase64String(cursor)));
+            request.ExclusiveStartKey = ConvertBase64StringToItem(cursor);
         }
 
         //Response processing
@@ -74,11 +72,9 @@ public class EventRepository : IEventRepository
             .Select(item => EventMessageMapper.ToEventMessage(item))
             .ToList();
 
-        var nextCursor = response.LastEvaluatedKey == null 
-            ? null 
-            : Convert.ToBase64String(
-                Encoding.UTF8.GetBytes(
-                    JsonSerializer.Serialize(response.LastEvaluatedKey)));
+        var nextCursor = response.LastEvaluatedKey == null
+            ? null
+            : ConvertItemToBase64String(response.LastEvaluatedKey);
 
         return new PaginatedEventsResult
         {
@@ -109,5 +105,19 @@ public class EventRepository : IEventRepository
         var item = response.Items.FirstOrDefault();
 
         return item is null ? null : EventMessageMapper.ToEventMessage(item);
+    }
+
+    private static string ConvertItemToBase64String(Dictionary<string, AttributeValue> item)
+    {
+        return Convert.ToBase64String(
+                Encoding.UTF8.GetBytes(
+                    JsonSerializer.Serialize(item)));
+    }
+
+    private static Dictionary<string, AttributeValue>? ConvertBase64StringToItem(string base64string)
+    {
+        return JsonSerializer.Deserialize<Dictionary<string, AttributeValue>>(
+                Encoding.UTF8.GetString(
+                    Convert.FromBase64String(base64string)));
     }
 }
