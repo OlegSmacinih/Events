@@ -16,7 +16,7 @@ public static class EventMessageMapper
         return new Dictionary<string, AttributeValue>
         {
             ["SerialNumber"] = new AttributeValue { S = message.SerialNumber },
-            ["TimeStamp"] = new AttributeValue { S = message.TimeStamp.ToString() },
+            ["TimeStamp"] = new AttributeValue { S = message.TimeStamp.ToUnixTimeSeconds().ToString() },
             ["DeviceType"] = new AttributeValue { S = message.DeviceType.ToString() },
             ["EventType"] = new AttributeValue { S = message.EventType },
             ["SerialNumberEventType"] = new AttributeValue
@@ -36,7 +36,8 @@ public static class EventMessageMapper
         return new EventMessage
         {
             SerialNumber = item["SerialNumber"].S,
-            TimeStamp = DateTimeOffset.Parse(item["TimeStamp"].S),
+            TimeStamp = DateTimeOffset.FromUnixTimeSeconds(
+                long.Parse(item["TimeStamp"].N)),
             DeviceType = Enum.Parse<DeviceType>(item["DeviceType"].S),
             EventType = item["EventType"].S
         };
