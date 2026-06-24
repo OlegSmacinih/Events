@@ -9,14 +9,18 @@ public static class DependencyInjection
     public static IServiceCollection AddRabbitMqPublishInfrastructure(this IServiceCollection services, IConfiguration configuration)
     {
         services.Configure<RabbitMqPublisherOptions>(configuration.GetSection("RabbitMq"));
-        services.AddScoped<IRabbitMqPublisher, RabbitMqPublisher>();        
+
+        services.AddSingleton<IRabbitMqConnectionManager, RabbitMqConnectionManager>();
+        services.AddSingleton<IRabbitMqPublisher, RabbitMqPublisher>();
 
         return services;
     }
 
     public static IServiceCollection AddRabbitMqConsumeInfrastructure(this IServiceCollection services, IConfiguration configuration)
     {
-        services.Configure<RabbitMqConsumerOptions>(configuration.GetSection("RabbitMq"));        
+        services.Configure<RabbitMqConsumerOptions>(configuration.GetSection("RabbitMq"));
+
+        services.AddSingleton<IRabbitMqConnectionManager, RabbitMqConnectionManager>();
         services.AddSingleton<IRabbitMqConsumer, RabbitMqConsumer>();
 
         return services;

@@ -9,10 +9,14 @@ namespace Events.Infrastructure.RabbitMq;
 public class RabbitMqPublisher : IRabbitMqPublisher
 {
     private readonly RabbitMqPublisherOptions _options;
+    private readonly IRabbitMqConnectionManager _connectionManager;
 
-    public RabbitMqPublisher(IOptions<RabbitMqPublisherOptions> options)
+    public RabbitMqPublisher(
+        IOptions<RabbitMqPublisherOptions> options,
+        IRabbitMqConnectionManager connectionManager)
     {
         _options = options.Value;
+        _connectionManager = connectionManager;
     }
 
     public async Task PublishAsync<T>(
@@ -20,32 +24,16 @@ public class RabbitMqPublisher : IRabbitMqPublisher
         string routingKey,
         CancellationToken cancellationToken)
     {
-        var factory = new ConnectionFactory
-        {
-            HostName = _options.HostName,
-            UserName = _options.UserName,
-            Password = _options.Password
-        };
-
-        using var connection = await factory.CreateConnectionAsync(cancellationToken);
-        using var channel = await connection.CreateChannelAsync(cancellationToken: cancellationToken);
-
-        var exchangeName = _options.ExchangeName;
-
-        await channel.ExchangeDeclareAsync(
-            exchange: exchangeName,
-            type: ExchangeType.Topic,
-            durable: true,
-            autoDelete: false,
-            cancellationToken: cancellationToken);
+        var channel = await _connectionManager.GetPublisherChannelAsync(cancellationToken);
 
         var json = JsonSerializer.Serialize(message);
         var body = Encoding.UTF8.GetBytes(json);
 
         await channel.BasicPublishAsync(
-            exchange: exchangeName,
+            exchange: _options.ExchangeName,
             routingKey: routingKey,
             body: body,
             cancellationToken: cancellationToken);
     }
+    
 }

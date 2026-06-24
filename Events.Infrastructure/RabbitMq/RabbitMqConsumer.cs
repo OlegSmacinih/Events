@@ -14,15 +14,18 @@ public class RabbitMqConsumer : IRabbitMqConsumer
 {
     private readonly ILogger<RabbitMqConsumer> _logger;
     private readonly RabbitMqConsumerOptions _options;
+    private readonly IRabbitMqConnectionManager _connectionManager;
     private readonly IEventMessageProcessor _messageProcessor;
 
     public RabbitMqConsumer(
         ILogger<RabbitMqConsumer> logger,
         IOptions<RabbitMqConsumerOptions> options,
+        IRabbitMqConnectionManager connectionManager,
         IEventMessageProcessor messageProcessor)
     {
         _logger = logger;
         _options = options.Value;
+        _connectionManager = connectionManager;
         _messageProcessor = messageProcessor;
     }    
 
@@ -30,26 +33,10 @@ public class RabbitMqConsumer : IRabbitMqConsumer
         DeviceType deviceType,
         CancellationToken cancellationToken)
     {       
-        var factory = new ConnectionFactory
-        {
-            HostName = _options.HostName,
-            UserName = _options.UserName,
-            Password = _options.Password
-        };
-
-        using var connection = await factory.CreateConnectionAsync(cancellationToken);
-        using var channel = await connection.CreateChannelAsync(cancellationToken: cancellationToken);
-
-        var exchangeName = _options.ExchangeName;        
+        var channel = await _connectionManager.GetConsumerChannelAsync(cancellationToken);
+       
         var queueName = _options.QueueName;
         var routingKey = _options.RoutingKey;
-
-        await DeclareRabbitMq(
-            channel,
-            exchangeName,
-            queueName,
-            routingKey,
-            cancellationToken);
 
         var consumer = new AsyncEventingBasicConsumer(channel);
         consumer.ReceivedAsync += async (model, ea) =>
@@ -66,34 +53,7 @@ public class RabbitMqConsumer : IRabbitMqConsumer
         _logger.LogInformation($"{deviceType} worker started. Queue={queueName}, RoutingKey={routingKey}");
 
         await Task.Delay(Timeout.Infinite, cancellationToken);
-    }
-
-    private async Task DeclareRabbitMq(
-        IChannel channel,
-        string exchangeName,
-        string queueName,
-        string routingKey,
-        CancellationToken cancellationToken)
-    {
-        await channel.ExchangeDeclareAsync(
-            exchange: exchangeName,
-            type: ExchangeType.Topic,
-            durable: true,
-            cancellationToken: cancellationToken);
-
-        await channel.QueueDeclareAsync(
-            queue: queueName,
-            durable: true,
-            exclusive: false,
-            autoDelete: false,
-            cancellationToken: cancellationToken);
-
-        await channel.QueueBindAsync(
-            queue: queueName,
-            exchange: exchangeName,
-            routingKey: routingKey,
-            cancellationToken: cancellationToken);
-    }
+    }    
 
     private async Task HandleMessageAsync(
         IChannel channel,
