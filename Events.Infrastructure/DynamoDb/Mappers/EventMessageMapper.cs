@@ -8,11 +8,6 @@ public static class EventMessageMapper
 {
     public static Dictionary<string, AttributeValue> ToDynamoDbItem(EventMessage message)
     {
-        if (message is null)
-        {
-            throw new ArgumentNullException("message is null and cannot be converted to DynamoDB item.");
-        }
-
         return new Dictionary<string, AttributeValue>
         {
             ["SerialNumber"] = new AttributeValue { S = message.SerialNumber },
@@ -28,11 +23,6 @@ public static class EventMessageMapper
 
     public static EventMessage ToEventMessage(Dictionary<string, AttributeValue> item)
     {
-        if (item is null)
-        {
-            throw new ArgumentNullException("item is null and cannot be converted to EventMessage object");
-        }
-
         return new EventMessage
         {
             SerialNumber = item["SerialNumber"].S,
