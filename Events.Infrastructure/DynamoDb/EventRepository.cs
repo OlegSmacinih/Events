@@ -65,15 +65,27 @@ public class EventRepository : IEventRepository
         }
 
         //Response processing
-        var response = await _dynamoDb.QueryAsync(request, cancellationToken);
+        var events = new List<EventMessage>();
+        Dictionary<string, AttributeValue>? lastKey = null;
 
-        var events = response.Items
-            .Select(item => EventMessageMapper.ToEventMessage(item))
-            .ToList();
+        do
+        {
+            var response = await _dynamoDb.QueryAsync(request, cancellationToken);
 
-        var nextCursor = response.LastEvaluatedKey == null
+            events.AddRange(response.Items
+                .Select(item => EventMessageMapper.ToEventMessage(item)));
+
+            lastKey = response.LastEvaluatedKey;
+            request.ExclusiveStartKey = lastKey;
+            request.Limit = limit - events.Count;
+        }
+        while (events.Count < limit && 
+                lastKey is not null && 
+                lastKey.Count > 0);
+        
+        var nextCursor = lastKey is null
             ? null
-            : ConvertItemToBase64String(response.LastEvaluatedKey);
+            : ConvertItemToBase64String(lastKey);
 
         return new PaginatedEventsResult
         {
