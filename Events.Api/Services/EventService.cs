@@ -1,7 +1,7 @@
-﻿using Events.Api.Exceptions;
-using Events.Contracts.Abstractions;
+﻿using Events.Contracts.Abstractions;
 using Events.Contracts.DTOs;
 using Events.Contracts.Enums;
+using Events.Contracts.Exceptions;
 using Events.Contracts.Messages;
 using Events.Contracts.Parsing;
 using Events.Contracts.Validation;

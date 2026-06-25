@@ -2,7 +2,7 @@
 using Amazon.DynamoDBv2.Model;
 using Events.Contracts.Abstractions;
 using Events.Contracts.DTOs;
-using Events.Contracts.Enums;
+using Events.Contracts.Exceptions;
 using Events.Contracts.Messages;
 using Events.Infrastructure.DynamoDb.Mappers;
 using Microsoft.Extensions.Options;
@@ -61,7 +61,14 @@ public class EventRepository : IEventRepository
 
         if (!string.IsNullOrEmpty(cursor))
         {
-            request.ExclusiveStartKey = ConvertBase64StringToItem(cursor);
+            try
+            {
+                request.ExclusiveStartKey = ConvertBase64StringToItem(cursor);
+            }
+            catch (Exception ex)
+            {
+                throw new BadRequestException("Invalid cursor");
+            }
         }
 
         //Response processing

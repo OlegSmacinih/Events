@@ -1,4 +1,4 @@
-﻿namespace Events.Api.Exceptions;
+﻿namespace Events.Contracts.Exceptions;
 
 public class BadRequestException : Exception
 {

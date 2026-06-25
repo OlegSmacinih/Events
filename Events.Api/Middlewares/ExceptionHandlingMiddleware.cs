@@ -1,4 +1,4 @@
-﻿using Events.Api.Exceptions;
+﻿using Events.Contracts.Exceptions;
 using System.Net;
 
 namespace Events.Api.Middlewares;
