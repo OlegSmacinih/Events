@@ -1,4 +1,5 @@
-﻿using System.Net;
+﻿using Events.Api.Exceptions;
+using System.Net;
 
 namespace Events.Api.Middlewares;
 
@@ -19,9 +20,9 @@ public class ExceptionHandlingMiddleware
         {
             await _next(context);
         }
-        catch (ArgumentException ex)
+        catch (BadRequestException ex)
         {
-            _logger.LogError(ex, "ArgumentException appeared");
+            _logger.LogError(ex, "BadRequestException appeared");
 
             context.Response.ContentType = "application/json";
             context.Response.StatusCode = (int)HttpStatusCode.BadRequest;

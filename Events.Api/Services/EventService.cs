@@ -1,5 +1,7 @@
-﻿using Events.Contracts.Abstractions;
+﻿using Events.Api.Exceptions;
+using Events.Contracts.Abstractions;
 using Events.Contracts.DTOs;
+using Events.Contracts.Enums;
 using Events.Contracts.Messages;
 using Events.Contracts.Parsing;
 using Events.Contracts.Validation;
@@ -22,11 +24,7 @@ public class EventService : IEventService
         CreateEventRequest request,
         CancellationToken cancellationToken)
     {
-        var deviceType = DeviceTypeParser.Parse(serialNumber);
-        if (!DeviceEventValidator.IsValid(deviceType, request.Type))
-        {
-            throw new ArgumentException("Invalid event type for this device.");
-        }        
+        var deviceType = ParseDeviceTypeAndCheckEventType(serialNumber, request.Type);
 
         var message = new EventMessage
         {
@@ -51,11 +49,11 @@ public class EventService : IEventService
     {
         if (from > to)
         {
-            throw new ArgumentException("from must be earlier than to");
+            throw new BadRequestException("from must be earlier than to");
         }
         if (limit <= 0)
         {
-            throw new ArgumentException("limit must be positive number");
+            throw new BadRequestException("limit must be positive number");
         }
 
         return await _eventRepository.GetDevicePaginatedEventsInRangeAsync(
@@ -72,15 +70,22 @@ public class EventService : IEventService
         string eventType, 
         CancellationToken cancellationToken)
     {
-        var deviceType = DeviceTypeParser.Parse(serialNumber);
-        if (!DeviceEventValidator.IsValid(deviceType, eventType))
-        {
-            throw new ArgumentException("Invalid event type for this device.");
-        }
+        var deviceType = ParseDeviceTypeAndCheckEventType(serialNumber, eventType);
 
         return await _eventRepository.GetMostRecentEventForTypeAsync(
             serialNumber,
             eventType,
             cancellationToken);
+    }
+
+    private DeviceType ParseDeviceTypeAndCheckEventType(string serialNumber, string eventType)
+    {
+        var deviceType = DeviceTypeParser.Parse(serialNumber);
+        if (!DeviceEventValidator.IsValid(deviceType, eventType))
+        {
+            throw new BadRequestException("Invalid event type for this device.");
+        }
+
+        return deviceType;
     }
 }
