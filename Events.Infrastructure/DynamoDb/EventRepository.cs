@@ -75,20 +75,28 @@ public class EventRepository : IEventRepository
         var events = new List<EventMessage>();
         Dictionary<string, AttributeValue>? lastKey = null;
 
-        do
+        try
         {
-            var response = await _dynamoDb.QueryAsync(request, cancellationToken);
+            do
+            {
+                var response = await _dynamoDb.QueryAsync(request, cancellationToken);
 
-            events.AddRange(response.Items
-                .Select(item => EventMessageMapper.ToEventMessage(item)));
+                events.AddRange(response.Items
+                    .Select(item => EventMessageMapper.ToEventMessage(item)));
 
-            lastKey = response.LastEvaluatedKey;
-            request.ExclusiveStartKey = lastKey;
-            request.Limit = limit - events.Count;
+                lastKey = response.LastEvaluatedKey;
+                request.ExclusiveStartKey = lastKey;
+                request.Limit = limit - events.Count;
+            }
+            while (events.Count < limit &&
+                    lastKey is not null &&
+                    lastKey.Count > 0);
         }
-        while (events.Count < limit && 
-                lastKey is not null && 
-                lastKey.Count > 0);
+        catch (AmazonDynamoDBException ex)
+        {
+            if (ex.ErrorCode == "ValidationException") throw new BadRequestException("Invalid input data");
+            throw;
+        }
         
         var nextCursor = lastKey is null
             ? null
