@@ -45,16 +45,12 @@ public class EventRepository : IEventRepository
         var request = new QueryRequest
         {
             TableName = _options.TableName,
-            KeyConditionExpression = "SerialNumber = :serialNumber AND #timestamp BETWEEN :from AND :to",
-            ExpressionAttributeNames = new Dictionary<string, string>
-            {
-                ["#timestamp"] = "TimeStamp"
-            },
+            KeyConditionExpression = "SerialNumber = :serialNumber AND EventKey BETWEEN :from AND :to",            
             ExpressionAttributeValues = new Dictionary<string, AttributeValue>
             {
                 [":serialNumber"] = new AttributeValue { S = serialNumber },
-                [":from"] = new AttributeValue { N = from.ToUnixTimeSeconds().ToString() },
-                [":to"] = new AttributeValue { N = to.ToUnixTimeSeconds().ToString() }
+                [":from"] = new AttributeValue { S = $"{from.ToUnixTimeSeconds()}#" },
+                [":to"] = new AttributeValue { S = $"{to.ToUnixTimeSeconds()}#~" }
             },
             Limit = limit
         };

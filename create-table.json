@@ -5,8 +5,8 @@
       "AttributeType": "S"
     },
     {
-      "AttributeName": "TimeStamp",
-      "AttributeType": "N"
+      "AttributeName": "EventKey",
+      "AttributeType": "S"
     },
     {
       "AttributeName": "SerialNumberEventType",
@@ -20,7 +20,7 @@
       "KeyType": "HASH"
     },
     {
-      "AttributeName": "TimeStamp",
+      "AttributeName": "EventKey",
       "KeyType": "RANGE"
     }
   ],
@@ -34,7 +34,7 @@
           "KeyType": "HASH"
         },
         {
-          "AttributeName": "TimeStamp",
+          "AttributeName": "EventKey",
           "KeyType": "RANGE"
         }
       ],
