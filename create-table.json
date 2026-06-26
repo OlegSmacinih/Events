@@ -6,7 +6,7 @@
     },
     {
       "AttributeName": "TimeStamp",
-      "AttributeType": "S"
+      "AttributeType": "N"
     },
     {
       "AttributeName": "SerialNumberEventType",

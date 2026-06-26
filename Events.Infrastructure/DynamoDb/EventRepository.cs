@@ -53,8 +53,8 @@ public class EventRepository : IEventRepository
             ExpressionAttributeValues = new Dictionary<string, AttributeValue>
             {
                 [":serialNumber"] = new AttributeValue { S = serialNumber },
-                [":from"] = new AttributeValue { S = from.ToUnixTimeSeconds().ToString() },
-                [":to"] = new AttributeValue { S = to.ToUnixTimeSeconds().ToString() }
+                [":from"] = new AttributeValue { N = from.ToUnixTimeSeconds().ToString() },
+                [":to"] = new AttributeValue { N = to.ToUnixTimeSeconds().ToString() }
             },
             Limit = limit
         };

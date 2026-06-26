@@ -11,7 +11,7 @@ public static class EventMessageMapper
         return new Dictionary<string, AttributeValue>
         {
             ["SerialNumber"] = new AttributeValue { S = message.SerialNumber },
-            ["TimeStamp"] = new AttributeValue { S = message.TimeStamp.ToUnixTimeSeconds().ToString() },
+            ["TimeStamp"] = new AttributeValue { N = message.TimeStamp.ToUnixTimeSeconds().ToString() },
             ["DeviceType"] = new AttributeValue { S = message.DeviceType.ToString() },
             ["EventType"] = new AttributeValue { S = message.EventType },
             ["SerialNumberEventType"] = new AttributeValue

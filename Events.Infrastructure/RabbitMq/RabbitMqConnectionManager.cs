@@ -85,9 +85,9 @@ public class RabbitMqConnectionManager : IRabbitMqConnectionManager
 
         var factory = new ConnectionFactory
         {
-            HostName = _publihserOptions.HostName,
-            UserName = _publihserOptions.UserName,
-            Password = _publihserOptions.Password
+            HostName = _publihserOptions.HostName is not null ? _publihserOptions.HostName : _consumerOptions.HostName,
+            UserName = _publihserOptions.UserName is not null ? _publihserOptions.UserName : _consumerOptions.UserName,
+            Password = _publihserOptions.Password is not null ? _publihserOptions.Password : _consumerOptions.Password
         };
 
         _connection = await factory.CreateConnectionAsync(cancellationToken);
