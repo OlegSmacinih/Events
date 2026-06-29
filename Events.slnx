@@ -7,5 +7,6 @@
   <Project Path="Events.Infrastructure/Events.Infrastructure.csproj" />
   <Project Path="Gdo.Worker/Gdo.Worker.csproj" />
   <Project Path="Lamp.Worker/Lamp.Worker.csproj" />
+  <Project Path="LoadGenerator/LoadGenerator.csproj" Id="cb4d010c-b69c-43e1-a3af-be75dd999e98" />
   <Project Path="Vkp.Worker/Vkp.Worker.csproj" />
 </Solution>

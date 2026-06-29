@@ -3,11 +3,14 @@ using Events.Contracts.Messages;
 
 namespace Events.Contracts.Abstractions;
 
-public interface IEventRepository
+public interface IEventService
 {
-    Task SaveAsync(EventMessage message, CancellationToken cancellationToken);
+    Task CreateEventAsync(
+        string serialNumber,
+        CreateEventRequest request,
+        CancellationToken cancellationToken);
 
-    Task<PaginatedEventsResult> GetDevicePaginatedEventsInRangeAsync(
+    Task<PaginatedEventsResult> GetDevicePaginatedEventsResultAsync(
         string serialNumber,
         DateTimeOffset from,
         DateTimeOffset to,
@@ -19,5 +22,4 @@ public interface IEventRepository
         string serialNumber,
         string eventType,
         CancellationToken cancellationToken);
-    
 }

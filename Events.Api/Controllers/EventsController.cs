@@ -1,8 +1,5 @@
 ﻿using Events.Contracts.Abstractions;
-using Events.Contracts.Messages;
-using Events.Contracts.Parsing;
-using Events.Contracts.Requests;
-using Events.Contracts.Validation;
+using Events.Contracts.DTOs;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Events.Api.Controllers;
@@ -12,66 +9,56 @@ namespace Events.Api.Controllers;
 public class EventsController : ControllerBase
 {
     private readonly ILogger<EventsController> _logger;
-    private readonly IRabbitMqPublisher _publisher;
+    private readonly IEventService _eventService;
 
-    public EventsController(ILogger<EventsController> logger, IRabbitMqPublisher publisher)
+    public EventsController(ILogger<EventsController> logger, IEventService eventService)
     {
         _logger = logger;
-        _publisher = publisher;
+        _eventService = eventService;
     }
 
     [HttpPost("{serialNumber}/events")]
     public async Task<IActionResult> CreateEvent(
         [FromRoute] string serialNumber, 
         [FromBody] CreateEventRequest request, 
-        CancellationToken cancellationToken)
+        CancellationToken cancellationToken = default)
     {
-        try
-        {
-            var deviceType = DeviceTypeParser.Parse(serialNumber);
-            if (!DeviceEventValidator.IsValid(deviceType, request.Type)) return BadRequest("Invalid event type for this device.");
-
-            var message = new EventMessage
-            {
-                SerialNumber = serialNumber,
-                DeviceType = deviceType,
-                EventType = request.Type,
-                TimeStamp = DateTimeOffset.UtcNow
-            };
-
-            var routingKey = $"{deviceType.ToString().ToLower()}.{request.Type}";
-
-            await _publisher.PublishAsync(message, routingKey, cancellationToken);
-        }
-        catch (ArgumentException ex)
-        {
-            return Problem(ex.Message);
-        }
-        catch (Exception ex)
-        {
-            return Problem("Some error appeared on the server");
-        }
-
-        return Ok();
+        await _eventService.CreateEventAsync(serialNumber, request, cancellationToken);
+        return Ok();       
     }
 
     [HttpGet("{serialNumber}/events")]
-    public async Task<IActionResult> GetPaginatedEventsInRange(
+    public async Task<IActionResult> GetDevicePaginatedEventsInRange(
         [FromRoute] string serialNumber,
-        [FromQuery] DateTime? from,
-        [FromQuery] DateTime? to,
-        [FromQuery] int? limit,
-        [FromQuery] string? cursor)
+        [FromQuery] DateTimeOffset from,
+        [FromQuery] DateTimeOffset to,
+        [FromQuery] int limit = 20,
+        [FromQuery] string? cursor = null,
+        CancellationToken cancellationToken = default)
     {
-        return NotFound();
+        var result = await _eventService.GetDevicePaginatedEventsResultAsync(
+            serialNumber,
+            from,
+            to,
+            limit,
+            cursor,
+            cancellationToken);
+
+        return Ok(result);
     }
 
     [HttpGet("{serialNumber}/events/latest")]
     public async Task<IActionResult> GetMostRecentEventForType(
         [FromRoute] string serialNumber,
-        [FromQuery] string type)
-    {
-        return NotFound();
+        [FromQuery] string eventType,
+        CancellationToken cancellationToken = default)
+    {        
+        var result = await _eventService.GetMostRecentEventForTypeAsync(
+            serialNumber,
+            eventType,
+            cancellationToken);            
+
+        return Ok(result);       
     }
 
 }

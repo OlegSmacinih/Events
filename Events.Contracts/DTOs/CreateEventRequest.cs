@@ -1,4 +1,4 @@
-﻿namespace Events.Contracts.Requests;
+﻿namespace Events.Contracts.DTOs;
 
 public class CreateEventRequest
 {

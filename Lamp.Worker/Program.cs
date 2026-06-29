@@ -5,11 +5,10 @@ using Lamp.Worker;
 
 var builder = Host.CreateApplicationBuilder(args);
 
-builder.Services.Configure<RabbitMqPublisherOptions>(builder.Configuration.GetSection("RabbitMq"));
 builder.Services.AddRabbitMqConsumeInfrastructure(builder.Configuration);
-builder.Services.AddSingleton<IEventMessageProcessor, LampEventMessageProcessor>();
-
 builder.Services.AddDynamoDbInfrastructure(builder.Configuration);
+builder.Services.AddSingleton<IEventRepository, EventRepository>();
+builder.Services.AddSingleton<IEventMessageProcessor, LampEventMessageProcessor>();
 
 builder.Services.AddHostedService<Worker>();
 
